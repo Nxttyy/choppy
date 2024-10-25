@@ -2,7 +2,10 @@ from urllib.parse import urlencode
 
 import requests
 from django.conf import settings
+from django.contrib.auth import login
 from django.http import HttpResponse, HttpResponseRedirect
+
+from .models import GitHubUser
 
 # Set your GitHub OAuth URLs
 client_id = settings.GITHUB_CLIENT_ID
@@ -55,5 +58,26 @@ def handle_oauth(request):
     )
     user_data = user_response.json()
 
-    # Display user information or handle it as needed
-    return HttpResponse(f"Authenticated as {user_data}")
+    # Create or get the GitHub user
+    github_id = user_data["id"]
+    username = user_data["login"]
+    avatar_url = user_data.get("avatar_url")
+    email = user_data.get("email")
+
+    user, created = GitHubUser.objects.get_or_create(
+        github_id=github_id,
+        defaults={
+            "username": username,
+            "access_token": access_token,
+            "avatar_url": avatar_url,
+            "email": email,
+        },
+    )
+    if not created:
+        # Update the access token if user already exists
+        user.access_token = access_token
+        user.save()
+
+    # Log in the user
+    login(request, user)
+    return HttpResponse(f"Authenticated as {user.username}")

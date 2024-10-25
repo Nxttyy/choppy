@@ -34,7 +34,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
+    # "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -136,3 +136,6 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))  # Ensure BASE_DIR is defin
 # Load GitHub OAuth credentials
 GITHUB_CLIENT_ID = env("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = env("GITHUB_CLIENT_SECRET")
+
+
+AUTH_USER_MODEL = "oauth.GitHubUser"
